@@ -436,6 +436,11 @@ bool classifyCommercial(camera_fb_t *fb) {
     }
     Serial.println();
 
+    // Inference timing (milliseconds). 'classification' is the neural-net time
+    // that the Tier 1 -O3 / static-arena flags are meant to reduce.
+    Serial.printf("Timing: dsp=%d ms, classification=%d ms, anomaly=%d ms\n",
+                  result.timing.dsp, result.timing.classification, result.timing.anomaly);
+
     for (size_t i = 0; i < EI_CLASSIFIER_LABEL_COUNT; i++) {
         if (strcmp(result.classification[i].label, "commercial") == 0) {
             return result.classification[i].value > 0.7f;
