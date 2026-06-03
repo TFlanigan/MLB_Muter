@@ -114,7 +114,17 @@ static EI_IMPULSE_ERROR inference_tflite_setup(
 
 #ifdef EI_CLASSIFIER_ALLOCATION_STATIC
     // Assign a no-op lambda to the "free" function in case of static arena
+    // PATCH (branch tier2-esp-nn-simd): guard DEFINE_SECTION. With EI_TENSOR_ARENA_LOCATION
+    // undefined, the macro stringizes to the literal "EI_TENSOR_ARENA_LOCATION" and the
+    // arena gets dumped into flash/DROM (read-only) -> "multiple DROM segments" boot loop.
+    // The EON model file already had this guard; tflite_micro.h was missing it. Without a
+    // section, the arena lands in normal .bss (internal SRAM, writable) as intended.
+    // NOTE: re-apply if edge-impulse-sdk/ is replaced by a new Studio deployment.
+#if defined(EI_TENSOR_ARENA_LOCATION)
     static uint8_t tensor_arena[EI_CLASSIFIER_TFLITE_LARGEST_ARENA_SIZE] ALIGN(16) DEFINE_SECTION(STRINGIZE_VALUE_OF(EI_TENSOR_ARENA_LOCATION));
+#else
+    static uint8_t tensor_arena[EI_CLASSIFIER_TFLITE_LARGEST_ARENA_SIZE] ALIGN(16);
+#endif
     p_tensor_arena = ei_unique_ptr_t(tensor_arena, [](void*){});
 #else
     // Create an area of memory to use for input, output, and intermediate arrays.

@@ -41,7 +41,7 @@
 
 #include <stdint.h>
 #include "model_metadata.h"
-#include "tflite-model/tflite_learn_986043_8_compiled.h"
+#include "tflite-model/tflite_learn_986043_8.h"
 #include "edge-impulse-sdk/classifier/ei_model_types.h"
 #include "edge-impulse-sdk/classifier/inferencing_engines/engines.h"
 #include "edge-impulse-sdk/classifier/postprocessing/ei_postprocessing_common.h"
@@ -77,13 +77,11 @@ ei_model_dsp_t ei_dsp_blocks_986043_1[ei_dsp_blocks_986043_1_size] = {
         nullptr, // data normalization config
     }
 };
-const ei_config_tflite_eon_graph_t ei_config_graph_986043_8 = {
+const ei_config_tflite_graph_t ei_config_graph_986043_8 = {
     .implementation_version = 1,
-    .model_init = &tflite_learn_986043_8_init,
-    .model_invoke = &tflite_learn_986043_8_invoke,
-    .model_reset = &tflite_learn_986043_8_reset,
-    .model_input = &tflite_learn_986043_8_input,
-    .model_output = &tflite_learn_986043_8_output,
+    .model = tflite_learn_986043_8,
+    .model_size = tflite_learn_986043_8_len,
+    .arena_size = tflite_learn_986043_8_arena_size
 };
 
 const uint8_t ei_output_tensors_indices_986043_8[1] = { 0 };
@@ -94,7 +92,7 @@ ei_learning_block_config_tflite_graph_t ei_learning_block_config_986043_8 = {
     .output_tensors_indices = ei_output_tensors_indices_986043_8,
     .output_tensors_size = ei_output_tensors_size_986043_8,
     .quantized = 1,
-    .compiled = 1,
+    .compiled = 0,
     .graph_config = (void*)&ei_config_graph_986043_8,
     .dequantize_output = 0,
 };
@@ -142,7 +140,7 @@ const ei_impulse_t impulse_986043_1 = {
     .project_name = "ESP32-CAM Commercial Detection",
     .impulse_id = 1,
     .impulse_name = "Impulse #1",
-    .deploy_version = 8,
+    .deploy_version = 9,
 
     .nn_input_frame_size = 27648,
     .raw_sample_count = 9216,

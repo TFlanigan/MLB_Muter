@@ -1,5 +1,3 @@
-#include "edge-impulse-sdk/classifier/ei_classifier_config.h"
-#if EI_CLASSIFIER_TFLITE_ENABLE_ESP_NN
 // Copyright 2020-2021 Espressif Systems (Shanghai) PTE LTD
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <edge-impulse-sdk/porting/espressif/ESP-NN/include/esp_nn_defs.h>
+#include <esp_nn_defs.h>
 
-#include <edge-impulse-sdk/porting/espressif/ESP-NN/src/common/common_functions.h>
+#include <common_functions.h>
 
 int esp_nn_get_conv_scratch_size_ansi(const data_dims_t *input_dims,
                                       const data_dims_t *filter_dims,
@@ -137,12 +135,19 @@ void esp_nn_conv_s8_ansi(const data_dims_t *input_dims,
     const int32_t activation_min = conv_params->activation.min;
     const int32_t activation_max = conv_params->activation.max;
 
+    /* Fall back to in_channels when filter_dims->channels is unset (legacy callers). */
+    const uint16_t filter_ch = filter_dims->channels ? filter_dims->channels : in_channels;
+    const int32_t groups = in_channels / filter_ch;
+    const int32_t filters_per_group = out_channels / groups;
+
     int32_t out_ch_idx, out_y, out_x, in_ch_idx, filter_y_idx, filter_x_idx;
 
     for (out_y = 0; out_y < out_ht; out_y++) {
         for (out_x = 0; out_x < out_wd; out_x++) {
             for (out_ch_idx = 0; out_ch_idx < out_channels; out_ch_idx++) {
                 int32_t conv_out = 0;
+                const int32_t group = out_ch_idx / filters_per_group;
+                const int32_t in_ch_start = group * filter_ch;
 
                 const int32_t base_y = stride_ht * out_y - pad_ht;
                 const int32_t base_x = stride_wd * out_x - pad_wd;
@@ -157,10 +162,10 @@ void esp_nn_conv_s8_ansi(const data_dims_t *input_dims,
                     for (filter_x_idx = filter_x_start; filter_x_idx < filter_x_end; filter_x_idx++) {
                         const int32_t in_row = base_y + filter_y_idx;
                         const int32_t in_col = base_x + filter_x_idx;
-                        int32_t input_base_offset = (in_row * input_wd + in_col) * in_channels;
-                        int32_t filter_base_offset = out_ch_idx * in_channels * filter_ht * filter_wd +
-                                                       (filter_y_idx * filter_wd + filter_x_idx) * in_channels;
-                        for (in_ch_idx = 0; in_ch_idx < in_channels; in_ch_idx++) {
+                        int32_t input_base_offset = (in_row * input_wd + in_col) * in_channels + in_ch_start;
+                        int32_t filter_base_offset = out_ch_idx * filter_ch * filter_ht * filter_wd +
+                                                       (filter_y_idx * filter_wd + filter_x_idx) * filter_ch;
+                        for (in_ch_idx = 0; in_ch_idx < filter_ch; in_ch_idx++) {
                             conv_out +=
                                 (input_data[input_base_offset + in_ch_idx] + input_offset) *
                                 filter_data[filter_base_offset + in_ch_idx];
@@ -179,5 +184,3 @@ void esp_nn_conv_s8_ansi(const data_dims_t *input_dims,
         }
     }
 }
-
-#endif // EI_CLASSIFIER_TFLITE_ENABLE_ESP_NN

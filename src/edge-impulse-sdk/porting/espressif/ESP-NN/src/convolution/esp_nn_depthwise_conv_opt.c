@@ -1,5 +1,3 @@
-#include "edge-impulse-sdk/classifier/ei_classifier_config.h"
-#if EI_CLASSIFIER_TFLITE_ENABLE_ESP_NN
 // Copyright 2020-2021 Espressif Systems (Shanghai) PTE LTD
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <edge-impulse-sdk/porting/espressif/ESP-NN/include/esp_nn_defs.h>
-#include <edge-impulse-sdk/porting/espressif/ESP-NN/src/common/common_functions.h>
+#include <esp_nn_defs.h>
+#include <common_functions.h>
 
 int esp_nn_get_depthwise_conv_scratch_size_opt(const data_dims_t *input_dims,
                                                const data_dims_t *filter_dims,
@@ -106,10 +104,10 @@ static void esp_nn_depthwise_conv_s8_ch_mult_1(const data_dims_t *input_dims,
                     result2 += bias[ch_idx + 2];
                     result3 += bias[ch_idx + 3];
                 }
-                result0 = esp_nn_multiply_by_quantized_mult_fast(result0, *out_mult++, *out_shift++);
-                result1 = esp_nn_multiply_by_quantized_mult_fast(result1, *out_mult++, *out_shift++);
-                result2 = esp_nn_multiply_by_quantized_mult_fast(result2, *out_mult++, *out_shift++);
-                result3 = esp_nn_multiply_by_quantized_mult_fast(result3, *out_mult++, *out_shift++);
+                result0 = esp_nn_requantize(result0, *out_mult++, *out_shift++);
+                result1 = esp_nn_requantize(result1, *out_mult++, *out_shift++);
+                result2 = esp_nn_requantize(result2, *out_mult++, *out_shift++);
+                result3 = esp_nn_requantize(result3, *out_mult++, *out_shift++);
 
                 result0 += out_offset;
                 result1 += out_offset;
@@ -148,7 +146,7 @@ static void esp_nn_depthwise_conv_s8_ch_mult_1(const data_dims_t *input_dims,
                 if (bias) {
                     result += bias[ch_idx];
                 }
-                result = esp_nn_multiply_by_quantized_mult_fast(result, *out_mult++, *out_shift++);
+                result = esp_nn_requantize(result, *out_mult++, *out_shift++);
                 result += out_offset;
                 result = max(result, activation_min);
                 result = min(result, activation_max);
@@ -238,10 +236,10 @@ void esp_nn_depthwise_conv_s8_opt(const data_dims_t *input_dims,
                         result2 += bias[out_ch_idx + 2];
                         result3 += bias[out_ch_idx + 3];
                     }
-                    result0 = esp_nn_multiply_by_quantized_mult_fast(result0, *out_mult++, *out_shift++);
-                    result1 = esp_nn_multiply_by_quantized_mult_fast(result1, *out_mult++, *out_shift++);
-                    result2 = esp_nn_multiply_by_quantized_mult_fast(result2, *out_mult++, *out_shift++);
-                    result3 = esp_nn_multiply_by_quantized_mult_fast(result3, *out_mult++, *out_shift++);
+                    result0 = esp_nn_requantize(result0, *out_mult++, *out_shift++);
+                    result1 = esp_nn_requantize(result1, *out_mult++, *out_shift++);
+                    result2 = esp_nn_requantize(result2, *out_mult++, *out_shift++);
+                    result3 = esp_nn_requantize(result3, *out_mult++, *out_shift++);
 
                     result0 += out_offset;
                     result1 += out_offset;
@@ -280,7 +278,7 @@ void esp_nn_depthwise_conv_s8_opt(const data_dims_t *input_dims,
                     if (bias) {
                         result += bias[out_ch_idx];
                     }
-                    result = esp_nn_multiply_by_quantized_mult_fast(result, *out_mult++, *out_shift++);
+                    result = esp_nn_requantize(result, *out_mult++, *out_shift++);
                     result += out_offset;
                     result = max(result, activation_min);
                     result = min(result, activation_max);
@@ -291,5 +289,3 @@ void esp_nn_depthwise_conv_s8_opt(const data_dims_t *input_dims,
         }
     }
 }
-
-#endif // EI_CLASSIFIER_TFLITE_ENABLE_ESP_NN

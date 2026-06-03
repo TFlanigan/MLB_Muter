@@ -1,5 +1,3 @@
-#include "edge-impulse-sdk/classifier/ei_classifier_config.h"
-#if EI_CLASSIFIER_TFLITE_ENABLE_ESP_NN && EI_CLASSIFIER_TFLITE_ENABLE_ESP_NN_S3
 // Copyright 2021-2022 Espressif Systems (Shanghai) PTE LTD
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -116,12 +114,3 @@ esp_nn_multiply_by_quantized_mult_asm_esp32s3:  # 0x4
     retw.n                          # [9]
 
     .size   esp_nn_multiply_by_quantized_mult_asm_esp32s3, . - esp_nn_multiply_by_quantized_mult_asm_esp32s3
-
-#elif defined(WIO_TERMINAL)
-// dummy code, added for old ARM toolchain
-.syntax unified
-.thumb
-.cpu cortex-m0
-
-.section .text
-#endif // EI_CLASSIFIER_TFLITE_ENABLE_ESP_NN && EI_CLASSIFIER_TFLITE_ENABLE_ESP_NN_S3

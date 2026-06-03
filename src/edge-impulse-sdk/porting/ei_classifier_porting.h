@@ -364,23 +364,14 @@ void ei_free(void *ptr);
 // End load porting layer depending on target
 
 // Additional configuration for specific architecture for Armv8.1-M architecture ie CM55 and CM85
-// Local patch: added #ifndef guards so build flags can override these.
-// Without the guards the EI SDK unconditionally redefines them, ignoring any
-// -DEI_MAX_OVERFLOW_BUFFER_COUNT=N build flag. NOTE: this patch must be
-// re-applied if the edge-impulse-sdk/ directory is replaced by a new Studio
-// deployment.
 #if defined (__ARM_ARCH ) && (__ARM_ARCH >= 8)
 
-#ifndef EI_MAX_OVERFLOW_BUFFER_COUNT
 #define EI_MAX_OVERFLOW_BUFFER_COUNT	50
-#endif
 
 #endif
 
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
-#ifndef EI_MAX_OVERFLOW_BUFFER_COUNT
 #define EI_MAX_OVERFLOW_BUFFER_COUNT	30
-#endif
 #endif
 
 // End additional configuration

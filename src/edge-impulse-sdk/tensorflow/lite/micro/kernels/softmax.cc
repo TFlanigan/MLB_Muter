@@ -271,6 +271,15 @@ limitations under the License.
 
 #if ESP_NN
 #include "edge-impulse-sdk/porting/espressif/ESP-NN/include/esp_nn.h"
+// PATCH (branch tier2-esp-nn-simd): route SOFTMAX to esp-nn's reference kernel —
+// optimized S3 kernels miscompute on this toolchain (see depthwise). The last
+// decision-affecting op still on the optimized path. Tiny op, no speed cost.
+#undef esp_nn_softmax_s8
+#define esp_nn_softmax_s8 esp_nn_softmax_s8_ansi
+#undef esp_nn_get_softmax_scratch_size
+#define esp_nn_get_softmax_scratch_size esp_nn_get_softmax_scratch_size_ansi
+#undef esp_nn_set_softmax_scratch_buf
+#define esp_nn_set_softmax_scratch_buf esp_nn_set_softmax_scratch_buf_ansi
 #endif
 
 long long softmax_total_time = 0;
