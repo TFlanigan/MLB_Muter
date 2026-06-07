@@ -80,8 +80,8 @@ uint16_t muteOffPronto[] = {
 
 
 // IR_SEND_PIN comes from camera_pins.h (board-specific)
-#define COMMERCIAL_CONFIRM_FRAMES 3
-#define PROGRAM_CONFIRM_FRAMES 5
+#define COMMERCIAL_CONFIRM_FRAMES 10
+#define PROGRAM_CONFIRM_FRAMES 2
 #define MUTE_TOGGLE_CODE 0xE0E040BFu
 
 IRsend irsend(IR_SEND_PIN);
@@ -443,7 +443,7 @@ bool classifyCommercial(camera_fb_t *fb) {
 
     for (size_t i = 0; i < EI_CLASSIFIER_LABEL_COUNT; i++) {
         if (strcmp(result.classification[i].label, "commercial") == 0) {
-            return result.classification[i].value > 0.7f;
+            return result.classification[i].value > 0.9f;
         }
     }
 
